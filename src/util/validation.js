@@ -28,6 +28,12 @@ const sharedQuerySchema = Joi.object({
     Joi.number().min(1).max(60000),
     Joi.string().min(1).max(2000),
   ]),
+  waitForSelector: Joi.object({
+    selector: Joi.string().min(1).max(2000),
+    options: Joi.object({
+      timeout: Joi.number().min(1).max(200000),
+    })
+  }),
   cookies: Joi.array().items(cookieSchema),
   output: Joi.string().valid(['pdf', 'screenshot']),
   'viewport.width': Joi.number().min(1).max(30000),
@@ -89,6 +95,12 @@ const renderBodyObject = Joi.object({
     Joi.number().min(1).max(60000),
     Joi.string().min(1).max(2000),
   ]),
+  waitForSelector : Joi.object({
+    selector: Joi.string().min(1).max(2000),
+    options: Joi.object({
+      timeout: Joi.number().min(1).max(200000),
+    })
+  }),
   goto: Joi.object({
     timeout: Joi.number().min(0).max(60000),
     waitUntil: Joi.string().min(1).max(2000),

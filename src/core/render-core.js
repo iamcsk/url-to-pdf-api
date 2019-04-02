@@ -45,7 +45,7 @@ async function render(_opts = {}) {
   });
   const page = await browser.newPage();
 
-  page.on('console', (...args) => logger.info('PAGE LOG:', ...args));
+  // page.on('console', (...args) => logger.info('PAGE LOG:', ...args));
 
   page.on('error', (err) => {
     logger.error(`Error event emitted: ${err}`);
@@ -74,7 +74,8 @@ async function render(_opts = {}) {
 
   let data;
   try {
-    logger.info('Set browser viewport..');
+    var sDate = new Date();
+    logger.info('Set browser viewport..', sDate);
     await page.setViewport(opts.viewport);
     if (opts.emulateScreenMedia) {
       logger.info('Emulate @media screen..');
@@ -85,6 +86,14 @@ async function render(_opts = {}) {
     opts.cookies.map(async (cookie) => {
       await page.setCookie(cookie);
     });
+
+ 
+     logger.info(`Goto url  ..${opts.goto}`);
+     logger.info(`Goto CSK timeout  ..${opts.waitForSelector.options.timeout}`);
+
+
+    await page.setDefaultNavigationTimeout(opts.waitForSelector.options.timeout);
+
 
     if (opts.html) {
       logger.info('Set HTML ..');
@@ -98,6 +107,9 @@ async function render(_opts = {}) {
     if (_.isNumber(opts.waitFor) || _.isString(opts.waitFor)) {
       logger.info(`Wait for ${opts.waitFor} ..`);
       await page.waitFor(opts.waitFor);
+    }
+    if(opts.waitForSelector){
+      await page.waitForSelector(opts.waitForSelector.selector,{timeout:opts.waitForSelector.options.timeout});
     }
 
     if (opts.scrollPage) {
@@ -133,6 +145,9 @@ async function render(_opts = {}) {
       `;
       throw new Error(msg);
     }
+     let dim = await page.evaluate(() => { return {height:document.documentElement.scrollHeight, width: document.documentElement.offsetWidth} });
+     opts.pdf.height = dim.height	
+     opts.pdf.width = dim.width
 
     if (opts.output === 'pdf') {
       data = await page.pdf(opts.pdf);
@@ -153,7 +168,9 @@ async function render(_opts = {}) {
     logger.error(err.stack);
     throw err;
   } finally {
-    logger.info('Closing browser..');
+    var eDate = new Date();
+    var diff = eDate - sDate;
+    logger.info('Closing browser..', eDate, ' diff ', diff);
     if (!config.DEBUG_MODE) {
       await browser.close();
     }
@@ -204,4 +221,3 @@ function logOpts(opts) {
 module.exports = {
   render,
 };
-
